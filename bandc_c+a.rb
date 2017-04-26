@@ -3,7 +3,7 @@ game_type = gets.chomp
 
 while game_type == "c" or "a"
   if game_type == "c"  
-    secret_number = Array(1..9).sample(6)
+    secret_number = Array(1..9).sample(4)
     classic_game = [0, 1, 2, 3]
     user_guess = ""
     
