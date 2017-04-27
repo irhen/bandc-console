@@ -28,7 +28,6 @@ end
 while game_type == "c" or "a" do
   if game_type == "c"  
     secret_number = Array(1..9).sample(4)
-    p secret_number #delete after testing
     classic_game = [0, 1, 2, 3]
     user_guess = ""
     
@@ -50,7 +49,6 @@ while game_type == "c" or "a" do
   
   elsif game_type == "a"  
     secret_number_a = Array(0..9).sample(6)
-    p secret_number_a #delete after testing
     advanced_game = [0, 1, 2, 3, 4, 5]
     user_guess_a = ""
     
