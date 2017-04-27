@@ -1,5 +1,5 @@
 puts "Welcome! Select classic or advanced game! For classic press 'c', for advanced press 'a'."
-game_type = gets.chomp
+game_type = gets.chomp.downcase
 
 def classic_check(variable)
   if variable.size != 4
@@ -25,7 +25,7 @@ def advanced_check(variable)
   end
 end
 
-while game_type == "c" or "a" do
+while game_type == "c" || game_type == "a" do
   if game_type == "c"  
     secret_number = Array(1..9).sample(4)
     classic_game = [0, 1, 2, 3]
