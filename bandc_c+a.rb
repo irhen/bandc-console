@@ -1,35 +1,51 @@
 def choosing_game
-    puts "Select classic or advanced game mode. For classic press 'c', for advanced press 'a'."
-    input = gets.chomp.downcase
+  puts "Select classic or advanced game mode. For classic press 'c', for advanced press 'a'."
+  input = gets.chomp.downcase
   yield input
 end
 
+def continue
+  puts "Do you want to play again? Press 'y' to continue or any other key to exit."
+  user_input = gets.chomp.downcase
+  yield user_input
+end
+
 def classic_check(variable)
+  result = false
   if variable.size != 4
     puts "Please, try again. Your guess must contain exactly 4 digits!"
+    result = true
   end
         
   if variable.uniq.length != 4
     puts "Please, try again. Your guess must contain 4 unique digits!"
+    result = true
   end
     
   if variable.include?(0)
     puts "Please, try again. You cannot use zero in your guess!"
+    result = true
   end
+  result
 end
 
 def advanced_check(variable)
+  result = false
   if variable.size != 6
     puts "Please, try again. Your guess must contain exactly 6 digits!"
+    result = true
   end
         
   if variable.uniq.length != 6
     puts "Please, try again. Your guess must contain 6 unique digits!"
+    result = true
   end
+  result
 end
 
 game_type = ""
 choice = Proc.new { |input| game_type = input }
+moving_on = Proc.new { |user_input| game_type = user_input }
 
 choosing_game(&choice)
 
@@ -44,7 +60,9 @@ while game_type do
     while user_guess != secret_number do
       user_guess = gets.chomp.split("").map { |el| el.to_i }
       
-      classic_check(user_guess)
+      if classic_check(user_guess) 
+        next
+      end
             
       bulls_n_cows = secret_number&user_guess
       bulls = classic_game.map{ |index| user_guess[index] == secret_number[index] }.select{ |value| value }
@@ -54,6 +72,13 @@ while game_type do
     end
     
     puts "You're gorgeous!"
+    
+    continue(&moving_on)
+    
+    if game_type != "y"
+      break
+    end
+    
     choosing_game(&choice)
   
   elsif game_type == "a"  
@@ -66,7 +91,9 @@ while game_type do
     while user_guess_a != secret_number_a do
       user_guess_a = gets.chomp.split("").map { |el| el.to_i }
       
-      advanced_check(user_guess_a)
+      if advanced_check(user_guess_a) 
+        next
+      end
             
       bulls_n_cows_a = secret_number_a&user_guess_a
       bulls_a = advanced_game.map{ |index| user_guess_a[index] == secret_number_a[index] }.select{ |value| value }
@@ -76,6 +103,13 @@ while game_type do
     end
     
     puts "You're super gorgeous!!"
+    
+    continue(&moving_on)
+    
+    if game_type != "y"
+      break
+    end
+    
     choosing_game(&choice)
     
   else 
