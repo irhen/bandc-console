@@ -6,8 +6,8 @@ end
 
 def continue
   puts "Do you want to play again? Press 'y' to continue or any other key to exit."
-  user_input = gets.chomp.downcase
-  yield user_input
+  input = gets.chomp.downcase
+  yield input
 end
 
 def classic_check(variable)
@@ -45,7 +45,8 @@ end
 
 game_type = ""
 choice = Proc.new { |input| game_type = input }
-moving_on = Proc.new { |user_input| game_type = user_input }
+moving_on = Proc.new { |input| game_type = input }
+score = []
 
 choosing_game(&choice)
 
@@ -59,6 +60,7 @@ while game_type do
     
     while user_guess != secret_number do
       user_guess = gets.chomp.split("").map { |el| el.to_i }
+      score << user_guess
       
       if classic_check(user_guess) 
         next
@@ -71,8 +73,12 @@ while game_type do
       puts "#{user_guess.join("")} has #{bulls.length} bulls and #{cows} cows."
     end
     
-    puts "You're gorgeous!"
-    
+    if score.size != 1
+      puts "You're gorgeous! You took #{score.size} guesses!"
+    else
+      puts "You're gorgeous! You took just #{score.size} guess!"
+    end
+    score = []
     continue(&moving_on)
     
     if game_type != "y"
@@ -90,6 +96,7 @@ while game_type do
     
     while user_guess_a != secret_number_a do
       user_guess_a = gets.chomp.split("").map { |el| el.to_i }
+      score << user_guess_a
       
       if advanced_check(user_guess_a) 
         next
@@ -102,7 +109,12 @@ while game_type do
       puts "#{user_guess_a.join("")} has #{bulls_a.length} bulls and #{cows_a} cows."
     end
     
-    puts "You're super gorgeous!!"
+    if score.size != 1
+      puts "You're super gorgeous!! You took #{score.size} guesses!"
+    else
+      puts "You're super gorgeous!! You took just #{score.size} guess!"
+    end
+    score = []
     
     continue(&moving_on)
     
