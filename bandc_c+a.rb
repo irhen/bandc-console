@@ -1,5 +1,8 @@
-puts "Welcome! Select classic or advanced game! For classic press 'c', for advanced press 'a'."
-game_type = gets.chomp.downcase
+def choosing_game
+    puts "Select classic or advanced game mode. For classic press 'c', for advanced press 'a'."
+    input = gets.chomp.downcase
+  yield input
+end
 
 def classic_check(variable)
   if variable.size != 4
@@ -25,7 +28,12 @@ def advanced_check(variable)
   end
 end
 
-while game_type == "c" || game_type == "a" do
+game_type = ""
+choice = Proc.new { |input| game_type = input }
+
+choosing_game(&choice)
+
+while game_type do
   if game_type == "c"  
     secret_number = Array(1..9).sample(4)
     classic_game = [0, 1, 2, 3]
@@ -42,10 +50,11 @@ while game_type == "c" || game_type == "a" do
       bulls = classic_game.map{ |index| user_guess[index] == secret_number[index] }.select{ |value| value }
       cows = bulls_n_cows.length - bulls.length
         
-      puts "#{user_guess.join('')} has #{bulls.length} bulls and #{cows} cows."
+      puts "#{user_guess.join("")} has #{bulls.length} bulls and #{cows} cows."
     end
     
     puts "You're gorgeous!"
+    choosing_game(&choice)
   
   elsif game_type == "a"  
     secret_number_a = Array(0..9).sample(6)
@@ -67,9 +76,10 @@ while game_type == "c" || game_type == "a" do
     end
     
     puts "You're super gorgeous!!"
+    choosing_game(&choice)
     
   else 
     puts "Didn’t quite catch that. What was it, again?"
-    game_type = gets.chomp
+    choosing_game(&choice)
   end
 end
