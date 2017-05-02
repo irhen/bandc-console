@@ -45,7 +45,6 @@ end
 
 game_type = ""
 choice = Proc.new { |input| game_type = input }
-moving_on = Proc.new { |input| game_type = input }
 score = []
 
 choosing_game(&choice)
@@ -79,7 +78,7 @@ while game_type do
       puts "You're gorgeous! You took just #{score.size} guess!"
     end
     score = []
-    continue(&moving_on)
+    continue(&choice)
     
     if game_type != "y"
       break
@@ -116,7 +115,7 @@ while game_type do
     end
     score = []
     
-    continue(&moving_on)
+    continue(&choice)
     
     if game_type != "y"
       break
