@@ -1,3 +1,57 @@
+config = {
+  classic: {
+    ranges: {
+      first: Array(1..4),
+      second: Array(5..8),
+      third: [9]
+    },
+    coeffs: {
+      first: [2, 2], 
+      second: [2, 2], 
+      third: [3]
+    }
+  },
+  advanced: {
+    ranges: {
+      first: Array(1..5),
+      second: Array(6..9).push(0)
+    },
+    coeffs: {
+      first: [10, 20, 10],
+      second: [10, 20, 10]
+    }
+  }
+}
+
+def gen_num(set, iter)
+  if iter == 0 
+    return []
+  end
+  local_set = set.clone
+  num = local_set.sample(1)
+  local_set.delete(num[0])
+  num.concat(gen_num(local_set, iter - 1))
+end
+
+def gen_set(range, mult)
+  result = Array(range)
+  mult.each do |k, v| 
+    result.concat(Array(0..(v - 2)).fill(k))
+  end
+  result.sort
+end
+
+def gen_mult(ranges, coeffs)
+  result = {}
+  ranges.each do |key, value| 
+    sub_range = value.sample(coeffs[key].length)
+    sub_range.each_with_index do |num, index|
+      result[num] = coeffs[key][index]
+    end
+  end
+  result
+end
+
 def choosing_game
   puts "Select classic or advanced game mode. For classic press 'c', for advanced press 'a'."
   input = gets.chomp.downcase
@@ -43,41 +97,45 @@ def advanced_check(variable)
   result
 end
 
-game_type = ""
-choice = Proc.new { |input| game_type = input }
+game = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5]]
 score = []
+user_guess = ""
+game_type = ""
+
+choice = Proc.new { |input| game_type = input }
 
 choosing_game(&choice)
 
 while game_type do
   if game_type == "c"  
-    secret_number = Array(1..9).sample(4)
-    classic_game = [0, 1, 2, 3]
-    user_guess = ""
-    
+    generated_mult = gen_mult(config[:classic][:ranges], config[:classic][:coeffs])
+    generated_set = gen_set(1..9, generated_mult)
+    secret_number = gen_num(generated_set, 4)
     puts "Input your guess using keyboard."
     
     while user_guess != secret_number do
       user_guess = gets.chomp.split("").map { |el| el.to_i }
-      score << user_guess
       
       if classic_check(user_guess) 
         next
       end
-            
+      
+      score << user_guess
       bulls_n_cows = secret_number&user_guess
-      bulls = classic_game.map{ |index| user_guess[index] == secret_number[index] }.select{ |value| value }
+      bulls = game[0].map { |index| user_guess[index] == secret_number[index] }.select { |value| value }
       cows = bulls_n_cows.length - bulls.length
         
       puts "#{user_guess.join("")} has #{bulls.length} bulls and #{cows} cows."
     end
     
     if score.size != 1
-      puts "You're gorgeous! You took #{score.size} guesses!"
+      puts "You're gorgeous! It took you #{score.size} guesses!"
     else
-      puts "You're gorgeous! You took just #{score.size} guess!"
+      puts "You're gorgeous! It took you just one guess!"
     end
+    
     score = []
+    
     continue(&choice)
     
     if game_type != "y"
@@ -86,33 +144,33 @@ while game_type do
     
     choosing_game(&choice)
   
-  elsif game_type == "a"  
-    secret_number_a = Array(0..9).sample(6)
-    advanced_game = [0, 1, 2, 3, 4, 5]
-    user_guess_a = ""
-    
+  elsif game_type == "a"
+    generated_mult = gen_mult(config[:advanced][:ranges], config[:advanced][:coeffs])
+    generated_set = gen_set(0..9, generated_mult)
+    secret_number = gen_num(generated_set, 6)
     puts "Input your guess using keyboard."
     
-    while user_guess_a != secret_number_a do
-      user_guess_a = gets.chomp.split("").map { |el| el.to_i }
-      score << user_guess_a
-      
-      if advanced_check(user_guess_a) 
+    while user_guess != secret_number do
+      user_guess = gets.chomp.split("").map { |el| el.to_i }
+
+      if advanced_check(user_guess) 
         next
       end
-            
-      bulls_n_cows_a = secret_number_a&user_guess_a
-      bulls_a = advanced_game.map{ |index| user_guess_a[index] == secret_number_a[index] }.select{ |value| value }
-      cows_a = bulls_n_cows_a.length - bulls_a.length
+      
+      score << user_guess            
+      bulls_n_cows = secret_number&user_guess
+      bulls = game[1].map { |index| user_guess[index] == secret_number[index] }.select { |value| value }
+      cows = bulls_n_cows.length - bulls.length
        
-      puts "#{user_guess_a.join("")} has #{bulls_a.length} bulls and #{cows_a} cows."
+      puts "#{user_guess.join("")} has #{bulls.length} bulls and #{cows} cows."
     end
     
     if score.size != 1
-      puts "You're super gorgeous!! You took #{score.size} guesses!"
+      puts "You're gorgeous! It took you #{score.size} guesses!"
     else
-      puts "You're super gorgeous!! You took just #{score.size} guess!"
+      puts "You're gorgeous! It took you just one guess!"
     end
+    
     score = []
     
     continue(&choice)
