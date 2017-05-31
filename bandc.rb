@@ -24,9 +24,7 @@ config = {
 }
 
 def gen_num(set, iter)
-  if iter == 0 
-    return []
-  end
+  return [] if iter == 0
   local_set = set.clone
   num = local_set.sample(1)
   local_set.delete(num[0])
@@ -53,14 +51,14 @@ def gen_mult(ranges, coeffs)
 end
 
 def gen_secret_number(config, type)
-  if type == "advanced"
-    generated_mult = gen_mult(config[:advanced][:ranges], config[:advanced][:coeffs])
-    generated_set = gen_set(0..9, generated_mult)
-    gen_num(generated_set, 6)
-    elsif type == "classic"
+  if type == 4
     generated_mult = gen_mult(config[:classic][:ranges], config[:classic][:coeffs])
     generated_set = gen_set(1..9, generated_mult)
     gen_num(generated_set, 4)
+    elsif type == 6
+    generated_mult = gen_mult(config[:advanced][:ranges], config[:advanced][:coeffs])
+    generated_set = gen_set(0..9, generated_mult)
+    gen_num(generated_set, 6)
   end
 end
 
@@ -79,18 +77,10 @@ end
 def is_wrong?(guess, number_of_digits)
   result = false
   if guess.length != number_of_digits
-    if number_of_digits == 4
-      puts "Please, try again. Your guess must contain exactly 4 digits!"
-      elsif number_of_digits == 6
-      puts "Please, try again. Your guess must contain exactly 6 digits!"
-    end
+    puts "Please, try again. Your guess must contain exactly #{number_of_digits} digits!"
     result = true
     elsif guess.uniq.length != number_of_digits
-    if number_of_digits == 4
-      puts "Please, try again. Your guess must contain 4 unique digits!"
-      elsif number_of_digits == 6
-      puts "Please, try again. Your guess must contain 6 unique digits!"
-    end
+    puts "Please, try again. Your guess must contain #{number_of_digits} unique digits!"
     result = true
   end
     
@@ -118,81 +108,56 @@ def how_gorgeous_is_user(score)
   end
 end
 
-def guessing(parameters, type)
+def guessing(parameters, element)
   bulls_n_cows = (parameters[:secret_number])&(parameters[:user_guess])
-  bulls = parameters[:game][type].map { |index| parameters[:user_guess][index] == parameters[:secret_number][index] }.select { |value| value }.length
+  bulls = parameters[:game][element].map { |index| parameters[:user_guess][index] == parameters[:secret_number][index] }.select { |value| value }.length
   cows = bulls_n_cows.length - bulls
   puts "#{parameters[:user_guess].join("")} has #{bulls} bulls and #{cows} cows."
 end
 
-game = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5]]
-score = []
-user_guess = ""
-game_type = ""
+def play(config, element, game_type_in_digits)
+  game = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5]]
+  score = []
+  user_guess = ""
 
+  secret_number = gen_secret_number(config, game_type_in_digits)
+  puts "Input your guess using keyboard."
+  
+  until user_guess == secret_number
+    user_guess = gets.chomp.split("")
+    parameters = { secret_number: secret_number, user_guess: user_guess, game: game }
+    
+    next if is_non_numerical?(user_guess)
+    
+    user_guess.map! { |el| el.to_i }
+    
+    next if is_wrong?(user_guess, game_type_in_digits)
+    
+    score << user_guess
+    
+    guessing(parameters, element)
+  end
+  
+  how_gorgeous_is_user(score)
+  
+  score = []
+end
+
+game_type = ""
 choice = lambda { |input| game_type = input }
 
 game_mode(&choice)
-
 while game_type
-  if game_type == "c"  
-    secret_number = gen_secret_number(config, "classic")
-    puts "Input your guess using keyboard."
-    
-    until user_guess == secret_number
-      user_guess = gets.chomp.split("")
-      parameters = { secret_number: secret_number, user_guess: user_guess, game: game }
-      
-      next if is_non_numerical?(user_guess)
-      
-      user_guess.map! { |el| el.to_i }
-      
-      next if is_wrong?(user_guess, 4)
-      
-      score << user_guess
-      
-      guessing(parameters, 0)
-    end
-    
-    how_gorgeous_is_user(score)
-    
-    score = []
-    
+  if game_type == "c"
+    play(config, 0, 4)
     will_play_again(&choice)
-    
     break unless game_type == "y"
-    
     game_mode(&choice)
-  
   elsif game_type == "a"
-    secret_number = gen_secret_number(config, "advanced")
-    puts "Input your guess using keyboard."
-    
-    until user_guess == secret_number
-      user_guess = gets.chomp.split("")
-      parameters = { secret_number: secret_number, user_guess: user_guess, game: game }
-      
-      next if is_non_numerical?(user_guess)
-      
-      user_guess.map! { |el| el.to_i }
-      
-      next if is_wrong?(user_guess, 6) 
-      
-      score << user_guess            
-      
-      guessing(parameters, 1)
-    end
-    
-    how_gorgeous_is_user(score)
-    
-    score = []
-    
+    play(config, 1, 6)
     will_play_again(&choice)
-    
     break unless game_type == "y"
-    
     game_mode(&choice)
-    
   else 
     puts "Didn’t quite catch that. What was it, again?"
     game_mode(&choice)
